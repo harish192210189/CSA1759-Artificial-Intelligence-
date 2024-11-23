@@ -1,0 +1,34 @@
+from heapq import heappop, heappush
+
+grid = [
+    [1, 1, 1, 1, 1],
+    [1, 0, 0, 1, 1],
+    [1, 1, 1, 1, 0],
+    [1, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1]
+]
+
+start, goal = (0, 0), (4, 4)
+pq, visited, g_cost = [(0, start)], set(), {start: 0}
+h_cost = lambda x, y: abs(goal[0] - x) + abs(goal[1] - y)
+
+while pq:
+    current_cost, current = heappop(pq)
+    if current == goal:
+        path = []
+        while current in g_cost:
+            path.append(current)
+            if current == start: break
+            current = min((n for n in visited if g_cost.get(n, float('inf')) < g_cost[current]), key=lambda n: g_cost[n], default=None)
+        print(f"Path: {' -> '.join(map(str, path[::-1]))}")
+        break
+    visited.add(current)
+    for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+        neighbor = (current[0] + dx, current[1] + dy)
+        if 0 <= neighbor[0] < len(grid) and 0 <= neighbor[1] < len(grid[0]) and grid[neighbor[0]][neighbor[1]]:
+            new_cost = g_cost[current] + 1
+            if neighbor not in g_cost or new_cost < g_cost[neighbor]:
+                g_cost[neighbor] = new_cost
+                heappush(pq, (new_cost + h_cost(*neighbor), neighbor))
+else:
+    print("No path found")
